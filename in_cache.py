@@ -27,5 +27,5 @@ async def exit(service_id: int, user_ip: str):
         __service_count[service_id] -= 1
 
 
-async def get_service_count():
-    return json.dumps(__service_count)
+async def get_service_count(id: int):
+    return __service_count.get(id, 0)
