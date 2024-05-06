@@ -8,8 +8,10 @@ class WebUIService(Base):
     __tablename__ = "webui_service"
 
     id = Column(Integer, primary_key=True, autoincrement="auto")
+    name = Column(String)
     host = Column(String)
     port = Column(Integer)
+    url = Column(String)
 
 
 ## create tables
@@ -21,8 +23,8 @@ def get_service_list(db: Session) -> list[WebUIService]:
 
 
 def create_service(db: Session, service: schemas.WebUIServiceCreateReq):
-    host, port = service.host, service.port
-    db_service = WebUIService(host=host, port=port)
+    name, host, port, url = service.name, service.host, service.port, service.url
+    db_service = WebUIService(name=name, host=host, port=port, url=url)
     db.add(db_service)
     db.commit()
     db.refresh(db_service)

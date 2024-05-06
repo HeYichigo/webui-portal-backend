@@ -21,9 +21,11 @@ async def get_service_list(db: Session = Depends(get_db)):
     service_list = models.get_service_list(db)
     res = []
     for s in service_list:
-        id, host, port = s.id, s.host, s.port
+        id, name, host, port, url = s.id, s.name, s.host, s.port, s.url
         count = await get_service_count(id)
-        item = WebUIServiceResp(id=id, host=host, port=port, count=count)
+        item = WebUIServiceResp(
+            id=id, name=name, host=host, port=port, url=url, count=count
+        )
         res.append(item)
     return res
 
