@@ -5,6 +5,7 @@ from schemas import EntryAndExit, WebUIServiceCreateReq, WebUIServiceResp
 from in_cache import entry, exit, get_service_count
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+import json
 
 app = FastAPI()
 app.add_middleware(
@@ -42,6 +43,14 @@ async def exit_service(item: EntryAndExit, req: Request):
     service_id, user_ip = item.service_id, req.client.host
     await exit(service_id, user_ip)
     return await get_service_count(service_id)
+
+
+@app.post("/beacon")
+async def exit_beacon(req: Request):
+    body = await req.body()
+    user_ip = req.client.host
+    body = json.loads(body)
+    await exit(body["service_id"], user_ip)
 
 
 @app.post("/reg")
