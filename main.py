@@ -2,7 +2,13 @@ from fastapi import FastAPI, Request, Depends
 from db import get_db
 import models
 from schemas import EntryAndExit, WebUIServiceCreateReq, WebUIServiceResp
-from in_cache import entry, exit, get_service_count
+from in_cache import (
+    entry,
+    exit,
+    get_service_count,
+    clear_service_count,
+    get_service_user_mapping,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import json
@@ -61,3 +67,13 @@ async def reg_service(service: WebUIServiceCreateReq, db: Session = Depends(get_
 @app.post("/unreg/{id}")
 async def unreg_service(id: int, db: Session = Depends(get_db)):
     return models.delet_service(db, id)
+
+
+@app.post("/clear_count/{id}")
+async def clear_count(id: int):
+    await clear_service_count(id)
+
+
+@app.get("/map")
+async def get_service_ip_map():
+    return await get_service_user_mapping()
