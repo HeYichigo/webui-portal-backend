@@ -1,6 +1,22 @@
 from pydantic import BaseModel
 
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class CreateUserReq(BaseModel):
+    username: str
+    password: str
+    org_id: int
+
+
+class LoginReq(BaseModel):
+    username: str
+    password: str
+
+
 class WebUIServiceResp(BaseModel):
     id: int
     name: str
