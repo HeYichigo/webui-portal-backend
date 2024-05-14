@@ -37,6 +37,22 @@ class Organization(Base):
 Base.metadata.create_all(bind=engine)
 
 
+def create_orgs(db: Session, orgs: list[schemas.Organization]):
+    orgs_list = []
+    for item in orgs:
+        ins, dep, dom = item.institution, item.department, item.domain
+        org = Organization(institution=ins, department=dep, domain=dom)
+        i = db.query(Organization).filter(Organization.domain == org.domain).first()
+        if i is None:
+            orgs_list.append(org)
+    db.add_all(orgs_list)
+    db.commit()
+
+
+def get_orgs_list(db: Session):
+    return db.query(Organization).all()
+
+
 def create_user(db: Session, userinfo: schemas.CreateUserReq, ip: str):
     username, password, org_id = userinfo.username, userinfo.password, userinfo.org_id
     user = User(username=username, password=password, ip=ip, org_id=org_id)

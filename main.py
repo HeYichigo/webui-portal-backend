@@ -9,6 +9,7 @@ from schemas import (
     Token,
     WebUIServiceCreateReq,
     WebUIServiceResp,
+    Organization,
 )
 from in_cache import (
     entry,
@@ -30,6 +31,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+## db: Session = Depends(get_db)
+## _: models.User = Depends(decode_jwt_token)
+
+
+@app.get("/orgs")
+async def get_orgs_list(
+    db: Session = Depends(get_db), _: models.User = Depends(decode_jwt_token)
+):
+    return models.get_orgs_list(db)
+
+
+@app.post("/orgs")
+async def init_orgs_list(
+    orgs: list[Organization],
+    db: Session = Depends(get_db),
+    _: models.User = Depends(decode_jwt_token),
+):
+    models.create_orgs(db, orgs)
+
 
 @app.post("/token")
 async def login(
@@ -43,11 +63,6 @@ async def login(
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     token = encode_jwt_token(user.username)
     return Token(access_token=token, token_type="bearer")
-
-
-@app.get("/users/me")
-async def read_users_me(user: models.User = Depends(decode_jwt_token)):
-    return user
 
 
 @app.post("/users")

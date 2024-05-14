@@ -6,6 +6,12 @@ class Token(BaseModel):
     token_type: str
 
 
+class Organization(BaseModel):
+    institution: str
+    department: str
+    domain: str
+
+
 class CreateUserReq(BaseModel):
     username: str
     password: str
