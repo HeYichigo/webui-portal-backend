@@ -73,6 +73,15 @@ async def get_user_list(db: Session = Depends(get_db)):
     return models.get_user_list(db)
 
 
+@app.delete("/users/{username}")
+async def delete_user(
+    username: str,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(decode_jwt_token),
+):
+    models.del_user(db, username)
+
+
 @app.get("/services", response_model=list[WebUIServiceResp])
 async def get_service_list(
     db: Session = Depends(get_db), _: models.User = Depends(decode_jwt_token)
@@ -116,11 +125,7 @@ async def exit_beacon(req: Request):
 
 
 @app.post("/reg")
-async def reg_service(
-    service: WebUIServiceCreateReq,
-    db: Session = Depends(get_db),
-    _: models.User = Depends(decode_jwt_token),
-):
+async def reg_service(service: WebUIServiceCreateReq, db: Session = Depends(get_db)):
     models.create_service(db, service)
 
 
