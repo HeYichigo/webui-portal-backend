@@ -36,18 +36,12 @@ app.add_middleware(
 
 
 @app.get("/orgs")
-async def get_orgs_list(
-    db: Session = Depends(get_db), _: models.User = Depends(decode_jwt_token)
-):
+async def get_orgs_list(db: Session = Depends(get_db)):
     return models.get_orgs_list(db)
 
 
 @app.post("/orgs")
-async def init_orgs_list(
-    orgs: list[Organization],
-    db: Session = Depends(get_db),
-    _: models.User = Depends(decode_jwt_token),
-):
+async def init_orgs_list(orgs: list[Organization], db: Session = Depends(get_db)):
     models.create_orgs(db, orgs)
 
 
@@ -67,6 +61,9 @@ async def login(
 
 @app.post("/users")
 async def create_user(user: CreateUserReq, req: Request, db: Session = Depends(get_db)):
+    db_user = models.get_user_by_username(db, user.username)
+    if db_user:
+        raise HTTPException(status_code=400, detail="username is already exsite")
     user = models.create_user(db, user, req.client.host)
     return user
 

@@ -15,6 +15,7 @@ class Organization(BaseModel):
 class CreateUserReq(BaseModel):
     username: str
     password: str
+    name: str
     org_id: int
 
 

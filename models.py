@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String
 from db import Base, engine
 from sqlalchemy.orm import Session
 import schemas
@@ -17,10 +17,11 @@ class WebUIService(Base):
 class User(Base):
     __tablename__ = "webui_user"
 
-    id = Column(Integer, primary_key=True, autoincrement="auto")
-    username = Column(String)
+    username = Column(String, primary_key=True)
     password = Column(String)
+    name = Column(String)
     ip = Column(String)
+    enabled = Column(Boolean)
     org_id = Column(Integer)
 
 
@@ -54,8 +55,20 @@ def get_orgs_list(db: Session):
 
 
 def create_user(db: Session, userinfo: schemas.CreateUserReq, ip: str):
-    username, password, org_id = userinfo.username, userinfo.password, userinfo.org_id
-    user = User(username=username, password=password, ip=ip, org_id=org_id)
+    username, password, name, org_id = (
+        userinfo.username,
+        userinfo.password,
+        userinfo.name,
+        userinfo.org_id,
+    )
+    user = User(
+        username=username,
+        password=password,
+        name=name,
+        ip=ip,
+        org_id=org_id,
+        enabled=True,
+    )
     db.add(user)
     db.commit()
     db.refresh(user)
