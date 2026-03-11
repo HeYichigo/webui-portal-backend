@@ -20,8 +20,8 @@ from schemas import (
     EntryAndExit,
     Organization,
     Token,
-    WebUIServiceCreateReq,
-    WebUIServiceResp,
+    WebServiceCreateReq,
+    WebServiceResp,
 )
 
 app = FastAPI()
@@ -85,7 +85,7 @@ async def delete_user(
     models.del_user(db, stu_id)
 
 
-@app.get("/services", response_model=list[WebUIServiceResp])
+@app.get("/services", response_model=list[WebServiceResp])
 async def get_service_list(
     db: Session = Depends(get_db), _: models.User = Depends(decode_jwt_token)
 ):
@@ -94,7 +94,7 @@ async def get_service_list(
     for s in service_list:
         id, name, host, port, url = s.id, s.name, s.host, s.port, s.url
         count = await get_service_count(id)
-        item = WebUIServiceResp(
+        item = WebServiceResp(
             id=id, name=name, host=host, port=port, url=url, count=count
         )
         res.append(item)
@@ -128,7 +128,7 @@ async def exit_beacon(req: Request):
 
 
 @app.post("/reg")
-async def reg_service(service: WebUIServiceCreateReq, db: Session = Depends(get_db)):
+async def reg_service(service: WebServiceCreateReq, db: Session = Depends(get_db)):
     models.create_service(db, service)
 
 

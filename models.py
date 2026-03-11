@@ -5,8 +5,8 @@ import schemas
 from db import Base, engine
 
 
-class WebUIService(Base):
-    __tablename__ = "webui_service"
+class WebService(Base):
+    __tablename__ = "web_service"
 
     id = Column(Integer, primary_key=True, autoincrement="auto")
     name = Column(String)
@@ -16,7 +16,7 @@ class WebUIService(Base):
 
 
 class User(Base):
-    __tablename__ = "webui_user"
+    __tablename__ = "user_info"
 
     stu_id = Column(String, primary_key=True)
     password = Column(String)
@@ -90,13 +90,13 @@ def get_user_list(db: Session):
     return db.query(User).all()
 
 
-def get_service_list(db: Session) -> list[WebUIService]:
-    return db.query(WebUIService).all()
+def get_service_list(db: Session) -> list[WebService]:
+    return db.query(WebService).all()
 
 
-def create_service(db: Session, service: schemas.WebUIServiceCreateReq):
+def create_service(db: Session, service: schemas.WebServiceCreateReq):
     name, host, port, url = service.name, service.host, service.port, service.url
-    db_service = WebUIService(name=name, host=host, port=port, url=url)
+    db_service = WebService(name=name, host=host, port=port, url=url)
     db.add(db_service)
     db.commit()
     db.refresh(db_service)
@@ -104,6 +104,6 @@ def create_service(db: Session, service: schemas.WebUIServiceCreateReq):
 
 
 def delet_service(db: Session, service_id: int):
-    service = db.query(WebUIService).filter(WebUIService.id == service_id).first()
+    service = db.query(WebService).filter(WebService.id == service_id).first()
     db.delete(service)
     db.commit()

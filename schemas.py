@@ -25,7 +25,7 @@ class LoginReq(BaseModel):
     password: str
 
 
-class WebUIServiceResp(BaseModel):
+class WebServiceResp(BaseModel):
     id: int
     name: str
     host: str
@@ -34,7 +34,7 @@ class WebUIServiceResp(BaseModel):
     count: int
 
 
-class WebUIServiceCreateReq(BaseModel):
+class WebServiceCreateReq(BaseModel):
     name: str
     host: str
     port: int
