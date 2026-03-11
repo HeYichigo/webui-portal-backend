@@ -14,14 +14,14 @@ class Organization(BaseModel):
 
 
 class CreateUserReq(BaseModel):
-    username: str
+    stu_id: str
     password: str
     name: str
     class_name: str
 
 
 class LoginReq(BaseModel):
-    username: str
+    stu_id: str
     password: str
 
 

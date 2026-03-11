@@ -52,20 +52,21 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
     ## 从DB验证用户名密码，成功后编码token发送回客户端
-    user = models.get_user_by_username(db, form_data.username)
+    ## TODO: username -> stu_id
+    user = models.get_user_by_stu_id(db, form_data.username)
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=400, detail="Incorrect student id or password")
     if not form_data.password == user.password:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-    token = encode_jwt_token(user.username)
+        raise HTTPException(status_code=400, detail="Incorrect student id or password")
+    token = encode_jwt_token(user.stu_id)
     return Token(access_token=token, token_type="bearer", name=user.name)
 
 
 @app.post("/users")
 async def create_user(user: CreateUserReq, req: Request, db: Session = Depends(get_db)):
-    db_user = models.get_user_by_username(db, user.username)
+    db_user = models.get_user_by_stu_id(db, user.stu_id)
     if db_user:
-        raise HTTPException(status_code=400, detail="username is already exsite")
+        raise HTTPException(status_code=400, detail="student is already exsite")
     user = models.create_user(db, user, req.client.host)
     return user
 
@@ -75,13 +76,13 @@ async def get_user_list(db: Session = Depends(get_db)):
     return models.get_user_list(db)
 
 
-@app.delete("/users/{username}")
+@app.delete("/users/{stu_id}")
 async def delete_user(
-    username: str,
+    stu_id: str,
     db: Session = Depends(get_db),
     _: models.User = Depends(decode_jwt_token),
 ):
-    models.del_user(db, username)
+    models.del_user(db, stu_id)
 
 
 @app.get("/services", response_model=list[WebUIServiceResp])

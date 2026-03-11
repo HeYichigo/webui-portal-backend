@@ -18,7 +18,7 @@ class WebUIService(Base):
 class User(Base):
     __tablename__ = "webui_user"
 
-    username = Column(String, primary_key=True)
+    stu_id = Column(String, primary_key=True)
     password = Column(String)
     name = Column(String)
     ip = Column(String)
@@ -56,14 +56,14 @@ def get_orgs_list(db: Session):
 
 
 def create_user(db: Session, userinfo: schemas.CreateUserReq, ip: str):
-    username, password, name, class_name = (
-        userinfo.username,
+    stu_id, password, name, class_name = (
+        userinfo.stu_id,
         userinfo.password,
         userinfo.name,
         userinfo.class_name,
     )
     user = User(
-        username=username,
+        stu_id=stu_id,
         password=password,
         name=name,
         ip=ip,
@@ -76,14 +76,14 @@ def create_user(db: Session, userinfo: schemas.CreateUserReq, ip: str):
     return user
 
 
-def del_user(db: Session, username: str):
-    user = get_user_by_username(db, username)
+def del_user(db: Session, stu_id: str):
+    user = get_user_by_stu_id(db, stu_id)
     db.delete(user)
     db.commit()
 
 
-def get_user_by_username(db: Session, username: str):
-    return db.query(User).filter(User.username == username).first()
+def get_user_by_stu_id(db: Session, stu_id: str):
+    return db.query(User).filter(User.stu_id == stu_id).first()
 
 
 def get_user_list(db: Session):
