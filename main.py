@@ -1,26 +1,28 @@
-from fastapi import FastAPI, HTTPException, Request, Depends
+import json
+
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
-from db import get_db
-from jwt import decode_jwt_token, encode_jwt_token
+from sqlalchemy.orm import Session
+
 import models
-from schemas import (
-    CreateUserReq,
-    EntryAndExit,
-    Token,
-    WebUIServiceCreateReq,
-    WebUIServiceResp,
-    Organization,
-)
+from db import get_db
 from in_cache import (
+    clear_service_count,
     entry,
     exit,
     get_service_count,
-    clear_service_count,
     get_service_user_mapping,
 )
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-import json
+from jwt import decode_jwt_token, encode_jwt_token
+from schemas import (
+    CreateUserReq,
+    EntryAndExit,
+    Organization,
+    Token,
+    WebUIServiceCreateReq,
+    WebUIServiceResp,
+)
 
 app = FastAPI()
 app.add_middleware(
@@ -56,7 +58,7 @@ async def login(
     if not form_data.password == user.password:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     token = encode_jwt_token(user.username)
-    return Token(access_token=token, token_type="bearer")
+    return Token(access_token=token, token_type="bearer", name=user.name)
 
 
 @app.post("/users")
