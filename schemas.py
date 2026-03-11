@@ -17,7 +17,7 @@ class CreateUserReq(BaseModel):
     username: str
     password: str
     name: str
-    org_id: int
+    class_name: str
 
 
 class LoginReq(BaseModel):

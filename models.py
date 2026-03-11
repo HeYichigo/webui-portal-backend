@@ -1,7 +1,8 @@
 from sqlalchemy import Boolean, Column, Integer, String
-from db import Base, engine
 from sqlalchemy.orm import Session
+
 import schemas
+from db import Base, engine
 
 
 class WebUIService(Base):
@@ -22,7 +23,7 @@ class User(Base):
     name = Column(String)
     ip = Column(String)
     enabled = Column(Boolean)
-    org_id = Column(Integer)
+    class_name = Column(String)
 
 
 class Organization(Base):
@@ -55,18 +56,18 @@ def get_orgs_list(db: Session):
 
 
 def create_user(db: Session, userinfo: schemas.CreateUserReq, ip: str):
-    username, password, name, org_id = (
+    username, password, name, class_name = (
         userinfo.username,
         userinfo.password,
         userinfo.name,
-        userinfo.org_id,
+        userinfo.class_name,
     )
     user = User(
         username=username,
         password=password,
         name=name,
         ip=ip,
-        org_id=org_id,
+        class_name=class_name,
         enabled=True,
     )
     db.add(user)
