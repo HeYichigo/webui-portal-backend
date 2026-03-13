@@ -1,8 +1,11 @@
 import json
+import os
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 import models
@@ -24,7 +27,9 @@ from schemas import (
     WebServiceResp,
 )
 
-app = FastAPI()
+app = FastAPI(title="WebUI Portal Backend")
+
+# 先添加 CORS 中间件
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -33,21 +38,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 其他 API 路由...
+# from .routers import api_router
+# app.include_router(api_router, prefix="/api")
+
+# 挂载 Vue 打包的静态文件 - 放在 API 路由之后
+# 请确保 vue-dist 目录存在且包含 build 后的文件
+VUE_DIST_PATH = os.path.join(os.path.dirname(__file__), "static", "dist")
+
 ## db: Session = Depends(get_db)
 ## _: models.User = Depends(decode_jwt_token)
 
 
-@app.get("/orgs")
+# 所有 API 路由添加 /api 前缀
+@app.get("/api/orgs")
 async def get_orgs_list(db: Session = Depends(get_db)):
     return models.get_orgs_list(db)
 
 
-@app.post("/orgs")
+@app.post("/api/orgs")
 async def init_orgs_list(orgs: list[Organization], db: Session = Depends(get_db)):
     models.create_orgs(db, orgs)
 
 
-@app.post("/token")
+@app.post("/api/token")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
@@ -62,7 +76,7 @@ async def login(
     return Token(access_token=token, token_type="bearer", name=user.name)
 
 
-@app.post("/users")
+@app.post("/api/users")
 async def create_user(user: CreateUserReq, req: Request, db: Session = Depends(get_db)):
     db_user = models.get_user_by_stu_id(db, user.stu_id)
     if db_user:
@@ -71,12 +85,12 @@ async def create_user(user: CreateUserReq, req: Request, db: Session = Depends(g
     return user
 
 
-@app.get("/users")
+@app.get("/api/users")
 async def get_user_list(db: Session = Depends(get_db)):
     return models.get_user_list(db)
 
 
-@app.delete("/users/{stu_id}")
+@app.delete("/api/users/{stu_id}")
 async def delete_user(
     stu_id: str,
     db: Session = Depends(get_db),
@@ -85,7 +99,7 @@ async def delete_user(
     models.del_user(db, stu_id)
 
 
-@app.get("/services", response_model=list[WebServiceResp])
+@app.get("/api/services", response_model=list[WebServiceResp])
 async def get_service_list(
     db: Session = Depends(get_db), _: models.User = Depends(decode_jwt_token)
 ):
@@ -101,7 +115,7 @@ async def get_service_list(
     return res
 
 
-@app.post("/entry")
+@app.post("/api/entry")
 async def entry_service(
     item: EntryAndExit, req: Request, _: models.User = Depends(decode_jwt_token)
 ):
@@ -110,7 +124,7 @@ async def entry_service(
     return await get_service_count(service_id)
 
 
-@app.post("/exit")
+@app.post("/api/exit")
 async def exit_service(
     item: EntryAndExit, req: Request, _: models.User = Depends(decode_jwt_token)
 ):
@@ -119,7 +133,7 @@ async def exit_service(
     return await get_service_count(service_id)
 
 
-@app.post("/beacon")
+@app.post("/api/beacon")
 async def exit_beacon(req: Request):
     body = await req.body()
     user_ip = req.client.host
@@ -127,23 +141,35 @@ async def exit_beacon(req: Request):
     await exit(body["service_id"], user_ip)
 
 
-@app.post("/reg")
+@app.post("/api/reg")
 async def reg_service(service: WebServiceCreateReq, db: Session = Depends(get_db)):
     models.create_service(db, service)
 
 
-@app.post("/unreg/{id}")
+@app.post("/api/unreg/{id}")
 async def unreg_service(
     id: int, db: Session = Depends(get_db), _: models.User = Depends(decode_jwt_token)
 ):
     return models.delet_service(db, id)
 
 
-@app.post("/clear_count/{id}")
+@app.post("/api/clear_count/{id}")
 async def clear_count(id: int, _: models.User = Depends(decode_jwt_token)):
     await clear_service_count(id)
 
 
-@app.get("/map")
+@app.get("/api/map")
 async def get_service_ip_map(_: models.User = Depends(decode_jwt_token)):
     return await get_service_user_mapping()
+
+
+# 最后挂载 Vue 静态文件，避免拦截 API 路由
+if os.path.exists(VUE_DIST_PATH):
+    # 将 Vue 应用挂载到根路径，API 路由因有 /api 前缀会优先匹配
+    app.mount("/", StaticFiles(directory=VUE_DIST_PATH, html=True), name="vue-app")
+
+else:
+
+    @app.get("/")
+    async def root():
+        return {"message": "Backend API is running. Vue frontend not deployed yet."}
