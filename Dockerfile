@@ -10,10 +10,6 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# 删除：RUN apt-get update && apt-get install -y --no-install-recommends \
-# 删除：    gcc \
-# 删除：    && rm -rf /var/lib/apt/lists/*
-
 # 安装系统依赖（Alpine 使用 apk 包管理器）
 RUN apk add --no-cache --virtual .build-deps \
     gcc \

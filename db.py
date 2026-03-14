@@ -1,9 +1,12 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = (
-    "postgresql+psycopg://portal_user:portal_user@10.66.88.8:7860/portal_db"
+SQLALCHEMY_DATABASE_URL = os.environ.get(
+    "DATABASE_URL",
+    "postgresql+psycopg://portal_user:portal_user@10.66.88.8:7860/portal_db",
 )
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
