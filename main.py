@@ -19,6 +19,7 @@ from in_cache import (
 )
 from jwt import decode_jwt_token, encode_jwt_token
 from schemas import (
+    ChangePasswordReq,
     CreateUserReq,
     EntryAndExit,
     Organization,
@@ -97,6 +98,30 @@ async def delete_user(
     _: models.User = Depends(decode_jwt_token),
 ):
     models.del_user(db, stu_id)
+
+
+@app.put("/api/users/password")
+async def update_password(req_data: ChangePasswordReq, db: Session = Depends(get_db)):
+    """
+    修改用户密码。
+    限制：只有当原密码为默认密码 '123456' 时才允许修改。
+    """
+    user = models.get_user_by_stu_id(db, req_data.stu_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Student ID not found")
+
+    success = models.change_password(
+        db, req_data.stu_id, req_data.old_password, req_data.new_password
+    )
+
+    if not success:
+        # 如果失败，说明原密码不是默认密码 '123456'
+        raise HTTPException(
+            status_code=400,
+            detail="Original password must be the default password to change it.",
+        )
+
+    return {"message": "Password updated successfully"}
 
 
 @app.get("/api/services", response_model=list[WebServiceResp])

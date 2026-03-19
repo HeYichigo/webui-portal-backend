@@ -25,6 +25,12 @@ class LoginReq(BaseModel):
     password: str
 
 
+class ChangePasswordReq(BaseModel):
+    stu_id: str
+    old_password: str
+    new_password: str
+
+
 class WebServiceResp(BaseModel):
     id: int
     name: str
