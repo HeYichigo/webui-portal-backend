@@ -90,20 +90,20 @@ def get_user_list(db: Session):
     return db.query(User).all()
 
 
-def change_password(db: Session, stu_id: str, old_password: str, new_password: str) -> bool:
+def change_password(
+    db: Session, stu_id: str, old_password: str, new_password: str
+) -> bool:
     """
     修改用户密码。
-    条件：原密码必须为默认密码 '123456'。
     返回：如果修改成功返回 True，如果用户不存在或原密码不匹配返回 False。
     """
     user = get_user_by_stu_id(db, stu_id)
     if not user:
         return False
-    
-    # 检查原密码是否为默认密码
-    if user.password != "123456":
+
+    if user.password != old_password:
         return False
-    
+
     # 执行更新
     user.password = new_password
     db.commit()
